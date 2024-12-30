@@ -1,0 +1,139 @@
+<view class="reader {{darkMode ? 'dark' : 'light'}}">
+  <!-- 沉浸式阅读区域 -->
+  <scroll-view 
+    class="content-scroll"
+    scroll-y
+    enhanced="{{true}}"
+    show-scrollbar="{{false}}"
+    bindscroll="onScroll"
+    scroll-top="{{scrollTop}}"
+    bindscrolltolower="loadMoreContent"
+  >
+    <view class="content-wrapper">
+      <view class="chapter-info" wx:if="{{metadata.title}}">
+        <text class="book-title">{{metadata.title}}</text>
+        <text class="chapter-title" wx:if="{{currentChapter}}">{{currentChapter.title}}</text>
+      </view>
+      
+      <view class="content">
+        <rich-text nodes="{{content}}" user-select></rich-text>
+      </view>
+
+      <view class="loading-hint" wx:if="{{loading}}">
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 轻触显示的控制区 -->
+  <view class="controls {{showControls ? 'visible' : ''}}" bindtap="toggleControls">
+    <!-- 顶部栏 -->
+    <view class="top-bar" catchtap="preventDefault">
+      <view class="back" bindtap="goBack">
+        <text class="icon">←</text>
+      </view>
+      <view class="progress">{{currentProgress}}</view>
+      <view class="menu" bindtap="toggleMenu">
+        <text class="icon">☰</text>
+      </view>
+    </view>
+
+    <!-- 底部栏 -->
+    <view class="bottom-bar" catchtap="preventDefault">
+      <view class="bottom-controls">
+        <view class="control-btn" bindtap="toggleDarkMode">
+          <text class="icon">{{darkMode ? '☀️' : '🌙'}}</text>
+        </view>
+        <view class="control-btn" bindtap="addBookmark">
+          <text class="icon">🔖</text>
+        </view>
+        <view class="control-btn {{bionicEnabled ? 'active' : ''}}" bindtap="toggleBionic">
+          <text class="icon">👁️</text>
+        </view>
+        <view class="control-btn" bindtap="showSettings">
+          <text class="icon">⚙️</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 侧边菜单 -->
+  <view class="side-panel {{showMenu ? 'visible' : ''}}">
+    <view class="panel-overlay" bindtap="toggleMenu"></view>
+    <view class="panel-content">
+      <view class="panel-header">
+        <text class="book-name">{{metadata.title || '阅读'}}</text>
+        <view class="close" bindtap="toggleMenu">×</view>
+      </view>
+
+      <view class="tab-bar">
+        <view class="tab {{activeTab === 'toc' ? 'active' : ''}}" 
+              bindtap="switchTab" data-tab="toc">目录</view>
+        <view class="tab {{activeTab === 'bookmarks' ? 'active' : ''}}" 
+              bindtap="switchTab" data-tab="bookmarks">书签</view>
+      </view>
+
+      <scroll-view scroll-y class="panel-scroll">
+        <!-- 目录内容 -->
+        <view class="toc-list" wx:if="{{activeTab === 'toc'}}">
+          <view wx:for="{{structure.toc}}" wx:key="index"
+                class="toc-item level-{{item.level}}"
+                bindtap="jumpToChapter" data-chapter="{{item}}">
+            <text class="{{currentChapter.id === item.id ? 'current' : ''}}">{{item.title}}</text>
+          </view>
+        </view>
+
+        <!-- 书签列表 -->
+        <view class="bookmark-list" wx:if="{{activeTab === 'bookmarks'}}">
+          <view wx:for="{{bookmarks}}" wx:key="index"
+                class="bookmark-item"
+                bindtap="jumpToBookmark" data-bookmark="{{item}}">
+            <view class="bookmark-title">{{item.title}}</view>
+            <view class="bookmark-info">{{item.chapter}} · {{item.date}}</view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 设置面板 -->
+  <view class="settings {{showSettings ? 'visible' : ''}}">
+    <view class="settings-overlay" bindtap="hideSettings"></view>
+    <view class="settings-content">
+      <view class="settings-header">
+        <text>阅读设置</text>
+        <view class="close" bindtap="hideSettings">×</view>
+      </view>
+
+      <view class="settings-body">
+        <view class="setting-group">
+          <text class="setting-label">字号</text>
+          <view class="font-size-controls">
+            <view class="size-btn" bindtap="decreaseFontSize">A-</view>
+            <text>{{fontSize}}px</text>
+            <view class="size-btn" bindtap="increaseFontSize">A+</view>
+          </view>
+        </view>
+
+        <view class="setting-group">
+          <text class="setting-label">行距</text>
+          <slider 
+            min="1" max="2" 
+            step="0.1" 
+            value="{{lineHeight}}"
+            block-size="20"
+            activeColor="#007AFF"
+            bindchange="changeLineHeight"
+          />
+        </view>
+
+        <view class="setting-group">
+          <text class="setting-label">仿生阅读</text>
+          <switch checked="{{bionicEnabled}}" bindchange="toggleBionic" color="#007AFF"/>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

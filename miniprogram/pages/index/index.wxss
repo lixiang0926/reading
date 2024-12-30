@@ -1,0 +1,106 @@
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.input-section {
+  width: 100%;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.upload-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+.support-text {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.divider {
+  text-align: center;
+  color: #999;
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background-color: #eee;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  background: #fff;
+}
+
+.char-count {
+  position: absolute;
+  right: 10px;
+  bottom: -20px;
+  font-size: 12px;
+  color: #999;
+}
+
+.action-section {
+  width: 100%;
+}
+
+.start-btn {
+  width: 100%;
+  background-color: #07c160;
+  color: white;
+}
+
+.start-btn[disabled] {
+  background-color: #9be6b4;
+  color: rgba(255, 255, 255, 0.8);
+}

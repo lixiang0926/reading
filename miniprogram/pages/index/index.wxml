@@ -1,0 +1,37 @@
+<view class="container">
+  <view class="header">
+    <text class="title">仿生阅读助手</text>
+    <text class="subtitle">支持中英文文本处理</text>
+  </view>
+  
+  <view class="input-section">
+    <button class="upload-btn" bindtap="chooseFile">上传文件</button>
+    <text class="support-text">支持 PDF、Word、TXT 格式</text>
+    
+    <view class="divider">或</view>
+    
+    <textarea
+      class="text-input"
+      placeholder="直接粘贴文本内容..."
+      bindinput="onInputChange"
+      value="{{inputText}}"
+      maxlength="-1"
+      auto-height="true"
+      show-confirm-bar="false"
+    ></textarea>
+    <text class="char-count" wx:if="{{inputText}}">{{inputText.length}} 字</text>
+  </view>
+  
+  <view class="settings-section">
+    <view class="setting-item">
+      <text>启用仿生阅读</text>
+      <switch checked="{{bionicEnabled}}" bindchange="onBionicChange"/>
+    </view>
+  </view>
+  
+  <view class="action-section">
+    <button class="start-btn" bindtap="startReading" disabled="{{!hasContent}}">
+      开始阅读
+    </button>
+  </view>
+</view>
