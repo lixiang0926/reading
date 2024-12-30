@@ -1,6 +1,10 @@
 // fileParser.js
+const API_BASE_URL = 'http://localhost:8000/api';  // 开发环境
+// const API_BASE_URL = 'https://your-production-domain.com/api';  // 生产环境
+
 class FileParser {
   constructor() {
+    this.apiBaseUrl = API_BASE_URL;
     this.maxFileSize = 5 * 1024 * 1024; // 5MB
   }
 
@@ -16,52 +20,82 @@ class FileParser {
     try {
       const fs = wx.getFileSystemManager();
       const content = fs.readFileSync(filePath, 'utf8');
-      return this.processTextContent(content);
+      return await this.parseFile(content);
     } catch (error) {
       console.error('读取文本文件失败:', error);
       throw new Error('读取文件失败: ' + error.message);
     }
   }
 
-  // 处理文本内容
-  processTextContent(content) {
-    // 移除空行并格式化
-    const lines = content.split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-
-    // 将内容分成段落
-    const paragraphs = [];
-    let currentParagraph = '';
-
-    for (const line of lines) {
-      if (line.length < 40 && line.endsWith('.')) {
-        // 可能是标题
-        if (currentParagraph) {
-          paragraphs.push(currentParagraph);
-          currentParagraph = '';
+  async parseFile(fileContent) {
+    try {
+      const response = await wx.request({
+        url: `${this.apiBaseUrl}/parse`,
+        method: 'POST',
+        data: {
+          content: fileContent
+        },
+        header: {
+          'content-type': 'application/json'
         }
-        paragraphs.push(line);
+      });
+
+      if (response.statusCode === 200 && response.data.success) {
+        return response.data.data;
       } else {
-        if (currentParagraph) {
-          currentParagraph += ' ';
-        }
-        currentParagraph += line;
-
-        // 如果行以句号结束，或者累积的段落太长，就开始新段落
-        if (line.endsWith('.') || currentParagraph.length > 1000) {
-          paragraphs.push(currentParagraph);
-          currentParagraph = '';
-        }
+        throw new Error(response.data.error || '解析失败');
       }
+    } catch (error) {
+      console.error('File parsing error:', error);
+      throw error;
     }
+  }
 
-    // 添加最后一个段落
-    if (currentParagraph) {
-      paragraphs.push(currentParagraph);
-    }
-
+  async processTextContent(content) {
+    const paragraphs = await this.parseFile(content);
     return paragraphs;
+  }
+
+  async processBionicReading(text) {
+    try {
+      const response = await wx.request({
+        url: `${this.apiBaseUrl}/bionic`,
+        method: 'POST',
+        data: {
+          text: text
+        },
+        header: {
+          'content-type': 'application/json'
+        }
+      });
+
+      if (response.statusCode === 200 && response.data.success) {
+        return response.data.data;
+      } else {
+        throw new Error(response.data.error || '处理失败');
+      }
+    } catch (error) {
+      console.error('Bionic reading processing error:', error);
+      throw error;
+    }
+  }
+
+  // 处理长文本，分段加载
+  async processLongText(text, startIndex = 0, length = 1000) {
+    const paragraphs = text.split('\n')
+      .filter(p => p.trim().length > 0);
+    
+    const truncatedParagraphs = paragraphs.slice(startIndex, startIndex + length);
+    
+    if (truncatedParagraphs.length === 0) {
+      return null;
+    }
+
+    return {
+      content: truncatedParagraphs,
+      hasMore: startIndex + length < paragraphs.length,
+      nextIndex: startIndex + length
+    };
   }
 
   // 截断过长的内容
